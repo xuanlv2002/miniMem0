@@ -9,7 +9,6 @@ import (
 	"miniMem0/llm"
 	"miniMem0/prompt"
 	"miniMem0/vector"
-	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,9 +42,8 @@ func (m *MemorySystem) String() string {
 }
 
 type Memory struct {
-	ID   string
-	Text string
-	Meta map[string]string
+	ID   string `json:"id"`
+	Text string `json:"text"`
 }
 
 // 事实提取 提取长期记忆内容
@@ -75,10 +73,9 @@ func (ms *MemorySystem) ExtractFacts(ctx context.Context, conversation string) (
 }
 
 type MemoryItem struct {
-	ID    string            `json:"ID"`
-	Text  string            `json:"Text"`
-	Meta  map[string]string `json:"Meta"`
-	Event string            `json:"event"`
+	ID    string `json:"id"`
+	Text  string `json:"text"`
+	Event string `json:"event"`
 }
 
 // 记忆对比
@@ -87,6 +84,8 @@ func (ms *MemorySystem) ProcessMemory(ctx context.Context, newFacts []string, ex
 		"new_facts":         newFacts,
 		"existing_memories": existingMemories,
 	}
+	fmt.Println("new_facts:", newFacts)
+	fmt.Println("existing_memories:", existingMemories)
 
 	inputJSON, err := json.Marshal(input)
 	if err != nil {
@@ -110,14 +109,9 @@ func (ms *MemorySystem) ProcessMemory(ctx context.Context, newFacts []string, ex
 	var response struct {
 		Memory []MemoryItem `json:"memory"`
 	}
-	fmt.Println("mem:", result.Content)
-	re := regexp.MustCompile(`\{.*\}`)
-	jsonStr := re.FindString(result.Content)
-	if jsonStr == "" {
-		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
-	}
 
-	if err := json.Unmarshal([]byte(jsonStr), &response); err != nil {
+	fmt.Println("提取的JSON数据:", result.Content)
+	if err := json.Unmarshal([]byte(result.Content), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
 
@@ -187,22 +181,24 @@ func (ms *MemorySystem) WriteMemory(ctx context.Context, conversation string) er
 	log.Printf("Extracted facts: %v", newFacts)
 
 	// 查询事实相关的记忆
-	var retrievedOldMemories []Memory
+	var retrievedOldMemoriesMap = make(map[string]Memory)
 	for _, fact := range newFacts {
-		memories, err := ms.Vector.Search(ctx, fact, 5, 0)
+		memories, err := ms.Vector.Search(ctx, fact, 10, 0)
 		if err != nil {
 			return fmt.Errorf("failed to search memories: %v", err)
 		}
 
 		for _, mem := range memories {
-			retrievedOldMemories = append(retrievedOldMemories, Memory{
+			retrievedOldMemoriesMap[mem.ID] = Memory{
 				ID:   mem.ID,
 				Text: mem.Content,
-				Meta: mem.Metadata,
-			})
+			}
 		}
 	}
-
+	var retrievedOldMemories = make([]Memory, 0)
+	for _, v := range retrievedOldMemoriesMap {
+		retrievedOldMemories = append(retrievedOldMemories, v)
+	}
 	// 对记忆进行修改处理
 	processedMemories, err := ms.ProcessMemory(ctx, newFacts, retrievedOldMemories)
 	if err != nil {
@@ -215,10 +211,9 @@ func (ms *MemorySystem) WriteMemory(ctx context.Context, conversation string) er
 		text := mem.Text
 
 		metadata := map[string]string{
-
 			"created_at": time.Now().Format(time.RFC3339),
 		}
-
+		fmt.Println("event:", mem)
 		switch event {
 		case "ADD":
 			if _, err := ms.AddMemory(ctx, text, metadata); err != nil {
@@ -243,18 +238,26 @@ func (ms *MemorySystem) WriteMemory(ctx context.Context, conversation string) er
 	return nil
 }
 
+type MemoryRet struct {
+	ID       string
+	Text     string
+	Meta     map[string]string
+	Similary float32
+}
+
 // SearchMemory searches for memories
-func (ms *MemorySystem) SearchMemory(ctx context.Context, query string) ([]Memory, error) {
-	ret, err := ms.Vector.Search(ctx, query, 10, 0.1)
+func (ms *MemorySystem) SearchMemory(ctx context.Context, query string) ([]MemoryRet, error) {
+	ret, err := ms.Vector.Search(ctx, query, 10, 0.5)
 	if err != nil {
 		return nil, err
 	}
-	memorys := make([]Memory, 0, len(ret))
+	memorys := make([]MemoryRet, 0, len(ret))
 	for _, v := range ret {
-		memorys = append(memorys, Memory{
-			ID:   v.ID,
-			Text: v.Content,
-			Meta: v.Metadata,
+		memorys = append(memorys, MemoryRet{
+			ID:       v.ID,
+			Text:     v.Content,
+			Meta:     v.Metadata,
+			Similary: v.Similarity,
 		})
 	}
 	return memorys, nil
