@@ -6,6 +6,7 @@ import (
 	"miniMem0/config"
 	"sync"
 
+	"github.com/philippgille/chromem-go"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -47,4 +48,14 @@ func (l *Embedding) Embedding(ctx context.Context, messages string) (*openai.Emb
 		return &resp.Data[0], nil
 	}
 	return nil, errors.New("no choices found")
+}
+
+func (l *Embedding) GetEmbeddingFunc() chromem.EmbeddingFunc {
+	return func(ctx context.Context, text string) ([]float32, error) {
+		embedding, err := l.Embedding(ctx, text)
+		if err != nil {
+			return nil, err
+		}
+		return embedding.Embedding, nil
+	}
 }

@@ -1,11 +1,17 @@
 LLM:
   MODEL: "Qwen/Qwen2.5-7B-Instruct"
   BASE_URL:  "https://api.siliconflow.cn/v1"
-  API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxx"
+  API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxx"
   TEMPERATURE: 0
 
 EMBEDDING:
   MODEL: "Qwen/Qwen3-Embedding-0.6B"
   BASE_URL:  "https://api.siliconflow.cn/v1"
-  API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+  API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
   DIMENSIONS: 1024
+
+VECTOR_DB:
+  PATH: "./vector_db"
+  COLLECTION_NAME: "vector_db"
+  MAX_TOPK: 10  # 最大返回数量
+  MIN_SIMILARITY_THRESHOLD: 0.1 # 相似度最小阈值

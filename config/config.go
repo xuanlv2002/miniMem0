@@ -2,7 +2,9 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
@@ -25,10 +27,19 @@ type EmbeddingConfig struct {
 	Dimensions int                   `mapstructure:"DIMENSIONS"`
 }
 
+// VectorConfig 定义向量数据库的配置结构
+type VectorConfig struct {
+	Path                string  `mapstructure:"PATH"`
+	Collection          string  `mapstructure:"COLLECTION_NAME"`
+	MaxTopK             int     `mapstructure:"MAX_TOPK"`
+	SimilarityThreshold float32 `mapstructure:"MIN_SIMILARITY_THRESHOLD"`
+}
+
 // Config 定义整个配置结构
 type Config struct {
 	ChatConfig      *LLMConfig       `mapstructure:"LLM"`
 	EmbeddingConfig *EmbeddingConfig `mapstructure:"EMBEDDING"`
+	VectorConfig    *VectorConfig    `mapstructure:"VECTOR_DB"`
 }
 
 func fileExists(filePath string) bool {
@@ -76,4 +87,47 @@ func (c *Config) GetChatConfig() *LLMConfig {
 // GetEmbeddingConfig 获取 Embedding 配置
 func (c *Config) GetEmbeddingConfig() *EmbeddingConfig {
 	return c.EmbeddingConfig
+}
+
+// GetEmbeddingConfig 获取 Embedding 配置
+func (c *Config) GetVectorConfig() *VectorConfig {
+	return c.VectorConfig
+}
+
+func (c *Config) String() string {
+	var sb strings.Builder
+
+	sb.WriteString("Config:\n")
+
+	if c.ChatConfig != nil {
+		sb.WriteString("  LLM Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    Model: %s\n", c.ChatConfig.Model))
+		sb.WriteString(fmt.Sprintf("    BaseURL: %s\n", c.ChatConfig.BaseURL))
+		sb.WriteString("    APIKey: [REDACTED]\n")
+		sb.WriteString(fmt.Sprintf("    Temperature: %.2f\n", c.ChatConfig.Temperature))
+	} else {
+		sb.WriteString("  LLM Configuration: nil\n")
+	}
+
+	if c.EmbeddingConfig != nil {
+		sb.WriteString("  Embedding Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    Model: %s\n", c.EmbeddingConfig.Model))
+		sb.WriteString(fmt.Sprintf("    BaseURL: %s\n", c.EmbeddingConfig.BaseURL))
+		sb.WriteString("    APIKey: [REDACTED]\n")
+		sb.WriteString(fmt.Sprintf("    Dimensions: %d\n", c.EmbeddingConfig.Dimensions))
+	} else {
+		sb.WriteString("  Embedding Configuration: nil\n")
+	}
+
+	if c.VectorConfig != nil {
+		sb.WriteString("  Vector Database Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    Path: %s\n", c.VectorConfig.Path))
+		sb.WriteString(fmt.Sprintf("    Collection: %s\n", c.VectorConfig.Collection))
+		sb.WriteString(fmt.Sprintf("    MaxTopK: %d\n", c.VectorConfig.MaxTopK))
+		sb.WriteString(fmt.Sprintf("    SimilarityThreshold: %.2f\n", c.VectorConfig.SimilarityThreshold))
+	} else {
+		sb.WriteString("  Vector Database Configuration: nil\n")
+	}
+
+	return sb.String()
 }

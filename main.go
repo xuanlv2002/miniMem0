@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 	"miniMem0/config"
-	"miniMem0/llm"
-	"miniMem0/vector"
-
-	"github.com/philippgille/chromem-go"
+	"miniMem0/memory"
 )
 
 func main() {
@@ -17,56 +14,26 @@ func main() {
 		fmt.Println("加载配置文件失败：", err)
 		return
 	}
-	fmt.Println("conf:", conf)
-
-	// 初始化LLM
-	// l := llm.NewLLM(conf.ChatConfig)
-	// resp, err := l.Chat(context.Background(), []openai.ChatCompletionMessage{
-	// 	{
-	// 		Role:    openai.ChatMessageRoleUser,
-	// 		Content: "你好",
-	// 	},
-	// })
-
-	// if err != nil {
-	// 	fmt.Println("调用LLM失败：", err)
-	// 	return
-	// }
-	// fmt.Println("LLM响应：", resp.Content)
-
-	// // 初始化Embedding
-	l2 := llm.NewEmbedding(conf.EmbeddingConfig)
-	// embed, err := l2.Embedding(context.Background(), []string{"你好"})
-	// if err != nil {
-	// 	fmt.Println("调用LLM失败：", err)
-	// 	return
-	// }
-	// fmt.Println("LLM响应：", len(embed.Embedding))
-
-	// 初始化向量数据库
-	v, err := vector.NewVector("./data", "knowledge-base", l2)
-
-	if err != nil {
-		fmt.Println("初始化向量数据库失败：", err)
-		return
-	}
-	err = v.Add(context.Background(), []chromem.Document{
-		{
-			ID:      "5",
-			Content: "你啊啊啊",
-		},
-	}, 1)
-	if err != nil {
-		fmt.Println("添加向量失败：", err)
-		return
-	}
-	c := v.Collection.Count()
-	fmt.Println("count:", c)
-	// 这里不可大于存储的文档数量
-
-	ret, _ := v.Search(context.Background(), "你好111121312312", 3)
-	fmt.Println("搜索结果：", len(ret))
+	fmt.Println(conf)
 	// 初始化记忆系统
+	memorySystem, err := memory.NewMemorySystem(conf)
+	if err != nil {
+		fmt.Println("初始化记忆系统失败：", err)
+		return
+	}
+	fmt.Println(memorySystem)
+	fmt.Println("初始化记忆系统成功")
 
-	// 启动web服务器
+	// err = memorySystem.WriteMemory(context.Background(), "你好，我是小明，我今年18岁，我来自中国，我是一名学生")
+	// if err != nil {
+	// 	fmt.Println("写入记忆失败：", err)
+	// 	return
+	// }
+	// fmt.Println("写入记忆成功")
+	mem, err := memorySystem.SearchMemory(context.Background(), "我的名称是什么")
+	if err != nil {
+		fmt.Println("搜索记忆失败：", err)
+		return
+	}
+	fmt.Println(mem)
 }
