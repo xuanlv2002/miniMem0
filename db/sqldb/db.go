@@ -9,7 +9,7 @@ import (
 )
 
 type SqlDB struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func NewSQL(cfg *config.SqlConfig) (*SqlDB, error) {
@@ -19,5 +19,9 @@ func NewSQL(cfg *config.SqlConfig) (*SqlDB, error) {
 	}
 	// Migrate the schema
 	db.AutoMigrate(&model.OriginalMemory{})
-	return &SqlDB{db: db}, nil
+	return &SqlDB{DB: db}, nil
+}
+
+func (db *SqlDB) AddOriginalMemory(memory *model.OriginalMemory) error {
+	return db.DB.Create(memory).Error
 }

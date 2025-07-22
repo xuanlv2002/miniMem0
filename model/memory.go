@@ -11,7 +11,8 @@ const (
 )
 
 type OriginalMemory struct {
-	Role       MemorySource
-	Content    string
-	CreateTime time.Time // 内置默认时间
+	ID        int64
+	Role      MemorySource
+	Content   string
+	CreatedAt time.Time // 内置默认时间
 }

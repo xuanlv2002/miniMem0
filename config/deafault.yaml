@@ -11,10 +11,10 @@ EMBEDDING:
   DIMENSIONS: 1024
 
 VECTOR_DB:
-  PATH: "../memory_db/long_term_memory"
+  PATH: "./memory_db/long_term_memory"
   COLLECTION_NAME: "long_term_memory"
   MAX_TOPK: 10  # 最大返回数量
   MIN_SIMILARITY_THRESHOLD: 0.1 # 相似度最小阈值
 
 SQL_DB:
-  PATH: "../memory_db/context_memory.db"
+  PATH: "./memory_db/context_memory.db"

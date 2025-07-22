@@ -1,11 +1,13 @@
 package memory
 
+import "miniMem0/config"
+
 // 原始记忆结构体 包含角色 内容 时间
 
 type MemorySystem struct {
 }
 
-func NewMemorySystem() (*MemorySystem, error) {
+func NewMemorySystem(option *config.Config) (*MemorySystem, error) {
 	return nil, nil
 }
 
