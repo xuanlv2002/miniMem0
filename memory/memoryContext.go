@@ -7,8 +7,8 @@ import (
 
 // 用于管理记忆上下文，及智能体所处的环境,总结,对内容理解提供一个大致的方向性
 type MemoryContext struct {
-	Summary           string
-	MemoryContextHand sqldb.SqlDB
+	Summary              string
+	MemoryContextHandler sqldb.SqlDB
 }
 
 func NewMemoryContext() *MemoryContext {

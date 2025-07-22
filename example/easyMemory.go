@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"log"
 	"miniMem0/config"
+	"miniMem0/db/vector"
 	"miniMem0/llm"
 	"miniMem0/prompt"
-	"miniMem0/vector"
 	"time"
 
 	"github.com/google/uuid"
