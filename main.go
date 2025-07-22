@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"miniMem0/config"
-	"miniMem0/memory"
+	"miniMem0/example"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	}
 
 	// 初始化记忆系统
-	memorySystem, err := memory.NewMemorySystem(conf)
+	memorySystem, err := example.NewMemorySystem(conf)
 	if err != nil {
 		fmt.Println("初始化记忆系统失败：", err)
 		return

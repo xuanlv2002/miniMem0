@@ -35,11 +35,16 @@ type VectorConfig struct {
 	SimilarityThreshold float32 `mapstructure:"MIN_SIMILARITY_THRESHOLD"`
 }
 
+type SqlConfig struct {
+	Path string `mapstructure:"PATH"`
+}
+
 // Config 定义整个配置结构
 type Config struct {
 	ChatConfig      *LLMConfig       `mapstructure:"LLM"`
 	EmbeddingConfig *EmbeddingConfig `mapstructure:"EMBEDDING"`
 	VectorConfig    *VectorConfig    `mapstructure:"VECTOR_DB"`
+	SqlConfig       *SqlConfig       `mapstructure:"SQL_DB"`
 }
 
 func fileExists(filePath string) bool {
