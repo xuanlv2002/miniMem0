@@ -1,5 +1,11 @@
 package memory
 
+import (
+	"miniMem0/config"
+	"miniMem0/db/sqldb"
+	"miniMem0/llm"
+)
+
 /*
 	用于管理短期记忆
 	包括瞬时记忆 和 短时记忆
@@ -9,5 +15,9 @@ package memory
 	且短时记忆可以被抽取为长期记忆
 */
 
-type ShortMemroy struct {
+type ShortMemroyHandler struct {
+}
+
+func NewShortMemory(config *config.ShortMemoryConfig, sqlHandler *sqldb.SqlHandler, llmModel *llm.LLM) *ShortMemroyHandler {
+	return &ShortMemroyHandler{}
 }

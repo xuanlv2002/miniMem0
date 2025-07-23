@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+/* 基础组件配置 */
 // LLMConfig 定义 LLM 服务的配置结构
 type LLMConfig struct {
 	Model       string  `mapstructure:"MODEL"`
@@ -39,12 +40,29 @@ type SqlConfig struct {
 	Path string `mapstructure:"PATH"`
 }
 
-// Config 定义整个配置结构
+/* 记忆层配置 */
+// MemoryContextConfig 定义记忆上下文的配置
+type MemoryContextConfig struct {
+}
+
+// LongMemoryConfig 定义长记忆的配置
+type LongMemoryConfig struct {
+}
+
+// ShortMemoryConfig 定义短记忆的配置
+
+type ShortMemoryConfig struct {
+}
+
+// Config 管理所有配置
 type Config struct {
-	ChatConfig      *LLMConfig       `mapstructure:"LLM"`
-	EmbeddingConfig *EmbeddingConfig `mapstructure:"EMBEDDING"`
-	VectorConfig    *VectorConfig    `mapstructure:"VECTOR_DB"`
-	SqlConfig       *SqlConfig       `mapstructure:"SQL_DB"`
+	ChatConfig          *LLMConfig           `mapstructure:"LLM"`
+	EmbeddingConfig     *EmbeddingConfig     `mapstructure:"EMBEDDING"`
+	VectorConfig        *VectorConfig        `mapstructure:"VECTOR_DB"`
+	SqlConfig           *SqlConfig           `mapstructure:"SQL_DB"`
+	MemoryContextConfig *MemoryContextConfig `mapstructure:"MEMORY_CONTEXT"`
+	LongMemoryConfig    *LongMemoryConfig    `mapstructure:"LONG_MEMORY"`
+	ShortMemoryConfig   *ShortMemoryConfig   `mapstructure:"SHORT_MEMORY"`
 }
 
 func fileExists(filePath string) bool {
@@ -99,6 +117,25 @@ func (c *Config) GetVectorConfig() *VectorConfig {
 	return c.VectorConfig
 }
 
+// GetSqlConfig 获取 Sql 配置
+func (c *Config) GetSqlConfig() *SqlConfig {
+	return c.SqlConfig
+}
+
+// GetMemoryContextConfig 获取 MemoryContext 配置
+func (c *Config) GetMemoryContextConfig() *MemoryContextConfig {
+	return c.MemoryContextConfig
+}
+
+// GetLongMemoryConfig 获取 LongMemory 配置
+func (c *Config) GetLongMemoryConfig() *LongMemoryConfig {
+	return c.LongMemoryConfig
+}
+
+// GetShortMemoryConfig 获取 ShortMemory 配置
+func (c *Config) GetShortMemoryConfig() *ShortMemoryConfig {
+	return c.ShortMemoryConfig
+}
 func (c *Config) String() string {
 	var sb strings.Builder
 
@@ -132,6 +169,31 @@ func (c *Config) String() string {
 		sb.WriteString(fmt.Sprintf("    SimilarityThreshold: %.2f\n", c.VectorConfig.SimilarityThreshold))
 	} else {
 		sb.WriteString("  Vector Database Configuration: nil\n")
+	}
+
+	if c.SqlConfig != nil {
+		sb.WriteString("  SQL Database Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    Path: %s\n", c.SqlConfig.Path))
+	} else {
+		sb.WriteString("  SQL Database Configuration: nil\n")
+	}
+
+	if c.MemoryContextConfig != nil {
+		sb.WriteString("  Memory Context Configuration: present\n")
+	} else {
+		sb.WriteString("  Memory Context Configuration: nil\n")
+	}
+
+	if c.LongMemoryConfig != nil {
+		sb.WriteString("  Long Memory Configuration: present\n")
+	} else {
+		sb.WriteString("  Long Memory Configuration: nil\n")
+	}
+
+	if c.ShortMemoryConfig != nil {
+		sb.WriteString("  Short Memory Configuration: present\n")
+	} else {
+		sb.WriteString("  Short Memory Configuration: nil\n")
 	}
 
 	return sb.String()
