@@ -18,3 +18,15 @@ VECTOR_DB:
 
 SQL_DB:
   PATH: "./memory_db/context_memory.db"
+
+
+
+CONTEXT_MEMORY:
+  SUMMARY_GAP: 5 # 每隔n条记录进行一次记忆总结 从p-head 小于短期记忆窗口 避免有可能的记忆上下文的丢失
+
+SHORT_MEMORY:
+  SHORT_WINDOW: 10 # 短期记忆长度 最近的十条记录作为短期记忆
+
+LONG_MEMORY:
+  LONG_WINDOW: 10 # >=gap 初始化时 会将最近15条记录作为长期记忆提取
+  LONG_GAP: 10 # 长期记忆间隔  每十条记录总结最近15条记录的事实

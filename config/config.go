@@ -42,16 +42,20 @@ type SqlConfig struct {
 
 /* 记忆层配置 */
 // MemoryContextConfig 定义记忆上下文的配置
-type MemoryContextConfig struct {
+type ContextMemoryConfig struct {
+	SummaryGap int `mapstructure:"SUMMARY_GAP"`
 }
 
 // LongMemoryConfig 定义长记忆的配置
 type LongMemoryConfig struct {
+	LongWindow int `mapstructure:"LONG_WINDOW"`
+	LongGap    int `mapstructure:"LONG_GAP"`
 }
 
 // ShortMemoryConfig 定义短记忆的配置
 
 type ShortMemoryConfig struct {
+	ShortWindow int `mapstructure:"SHORT_WINDOW"`
 }
 
 // Config 管理所有配置
@@ -60,7 +64,7 @@ type Config struct {
 	EmbeddingConfig     *EmbeddingConfig     `mapstructure:"EMBEDDING"`
 	VectorConfig        *VectorConfig        `mapstructure:"VECTOR_DB"`
 	SqlConfig           *SqlConfig           `mapstructure:"SQL_DB"`
-	MemoryContextConfig *MemoryContextConfig `mapstructure:"MEMORY_CONTEXT"`
+	MemoryContextConfig *ContextMemoryConfig `mapstructure:"CONTEXT_MEMORY"`
 	LongMemoryConfig    *LongMemoryConfig    `mapstructure:"LONG_MEMORY"`
 	ShortMemoryConfig   *ShortMemoryConfig   `mapstructure:"SHORT_MEMORY"`
 }
@@ -123,7 +127,7 @@ func (c *Config) GetSqlConfig() *SqlConfig {
 }
 
 // GetMemoryContextConfig 获取 MemoryContext 配置
-func (c *Config) GetMemoryContextConfig() *MemoryContextConfig {
+func (c *Config) GetMemoryContextConfig() *ContextMemoryConfig {
 	return c.MemoryContextConfig
 }
 

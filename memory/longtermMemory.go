@@ -14,6 +14,7 @@ import (
 */
 
 type LongMemoryHandler struct {
+	config *config.LongMemoryConfig
 }
 
 func NewLongMemory(config *config.LongMemoryConfig, vector *vector.Vector, sqlHandler *sqldb.SqlHandler, llmModel *llm.LLM) *LongMemoryHandler {

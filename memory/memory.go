@@ -31,11 +31,11 @@ func NewMemorySystem(options *config.Config) (*MemorySystem, error) {
 		return nil, err
 	}
 	// 初始化记忆上下文系统
-	contextMemoryHandler := NewMemoryContext(options.GetMemoryContextConfig(), sqlHandler, llmModel)
+	contextMemoryHandler := NewContextMemoryHandler(options.GetMemoryContextConfig(), sqlHandler, llmModel)
 	// 初始化长期记忆系统。
 	longMemoryHandler := NewLongMemory(options.GetLongMemoryConfig(), vectorDB, sqlHandler, llmModel)
 	// 初始化短期记忆系统
-	shortMemoryHandler := NewShortMemory(options.GetShortMemoryConfig(), sqlHandler, llmModel)
+	shortMemoryHandler := NewShortMemoryHandler(options.GetShortMemoryConfig(), sqlHandler)
 
 	return &MemorySystem{
 		ContextMemoryHandler: contextMemoryHandler,
