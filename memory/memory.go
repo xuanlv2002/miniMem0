@@ -5,6 +5,9 @@ import "miniMem0/config"
 // 原始记忆结构体 包含角色 内容 时间
 
 type MemorySystem struct {
+	LongMemorySystem  *LongMemory
+	ShortMemorySystem *ShortMemroy
+	MemoryContext     *MemoryContext
 }
 
 func NewMemorySystem(option *config.Config) (*MemorySystem, error) {
