@@ -3,6 +3,7 @@ package sqldb
 import (
 	"miniMem0/config"
 	"miniMem0/model"
+	"sort"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -36,6 +37,11 @@ func (db *SqlHandler) GetLastOriginalMemory(count int) ([]model.OriginalMemory, 
 	if err != nil {
 		return nil, 0, err
 	}
+	// 小到大排序
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].ID < ret[j].ID
+	})
+
 	return ret, retCount, nil
 }
 

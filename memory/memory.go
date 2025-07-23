@@ -44,12 +44,23 @@ func NewMemorySystem(options *config.Config) (*MemorySystem, error) {
 	}, nil
 }
 
+func (m *MemorySystem) InitMemory() error {
+	return nil
+}
+
 // 处理大模型输入内容
-func ProcessInput(input string) string {
+func (m *MemorySystem) ProcessInput(input string) string {
+	// 存储OriginalMemory
+	// 获得上下文记忆
+	// 获得长期记忆
+	// 获得短期记忆
+	// 拼接记忆内容
+	// 返回拼接后的prompt
 	return ""
 }
 
 // 处理大模型输出内容
-func ProcessOutput(ouput string) error {
+func (m *MemorySystem) ProcessOutput(ouput string) error {
+	// 存储OriginalMemory
 	return nil
 }
