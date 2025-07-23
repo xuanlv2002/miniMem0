@@ -74,7 +74,6 @@ func (db *SqlHandler) SaveContextMemory(memory *model.ContextMemory) error {
 }
 
 // 获得未总结的记忆的个数
-
 func (db *SqlHandler) GetUnSummarizedMemoryCount(lastSummaryID int64) (int64, error) {
 	var count int64
 	err := db.DB.Model(&model.OriginalMemory{}).Where("id > ?", lastSummaryID).Count(&count).Error

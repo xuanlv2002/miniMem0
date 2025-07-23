@@ -189,7 +189,7 @@ func (ms *MemorySystem) WriteMemory(ctx context.Context, conversation string) er
 	// 查询事实相关的记忆
 	var retrievedOldMemoriesMap = make(map[string]Memory)
 	for _, fact := range newFacts {
-		memories, err := ms.Vector.Search(ctx, fact, 10, 0)
+		memories, err := ms.Vector.Search(ctx, fact)
 		if err != nil {
 			return fmt.Errorf("failed to search memories: %v", err)
 		}
@@ -253,7 +253,7 @@ type MemoryRet struct {
 
 // SearchMemory searches for memories
 func (ms *MemorySystem) SearchMemory(ctx context.Context, query string) ([]MemoryRet, error) {
-	ret, err := ms.Vector.Search(ctx, query, 10, 0.5)
+	ret, err := ms.Vector.Search(ctx, query)
 	if err != nil {
 		return nil, err
 	}

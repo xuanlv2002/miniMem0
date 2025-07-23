@@ -42,25 +42,22 @@ func (v *Vector) Delete(ctx context.Context, ids []string) error {
 }
 
 // 查询向量
-func (v *Vector) Search(ctx context.Context, search string, topK int, threshold float32) ([]chromem.Result, error) {
-	if v.Collection.Count() < topK {
+func (v *Vector) Search(ctx context.Context, search string) ([]chromem.Result, error) {
+	topK := v.Config.TopK
+	if v.Collection.Count() < v.Config.TopK {
 		topK = v.Collection.Count()
 	}
-	if topK > v.Config.MaxTopK {
-		topK = v.Config.MaxTopK
-	}
+
 	res, err := v.Collection.Query(ctx, search, topK, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// 只有相似度大于阈值的会被返回
-	if threshold < v.Config.SimilarityThreshold {
-		threshold = v.Config.SimilarityThreshold
-	}
+
 	ret := make([]chromem.Result, 0, len(res))
 	for _, r := range res {
-		if r.Similarity >= threshold {
+		if r.Similarity >= v.Config.SimilarityThreshold {
 			ret = append(ret, r)
 		}
 	}

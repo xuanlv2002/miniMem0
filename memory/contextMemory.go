@@ -36,7 +36,7 @@ func (m *ContextMemoryHandler) WaitDone() {
 }
 
 // 返回获得的上下文记忆
-func (m *ContextMemoryHandler) GetMemoryContext() (*model.ContextMemory, error) {
+func (m *ContextMemoryHandler) GetContextMemory() (*model.ContextMemory, error) {
 	contextMemory, err := m.sqlHandler.GetLastContextMemory()
 	if err != nil {
 		return nil, err
@@ -50,16 +50,16 @@ func (m *ContextMemoryHandler) UpdateContextMemory() {
 	m.wg.Add(1)
 	go func() {
 		defer m.wg.Done()
-		err := m.SummaryMemoryContext()
+		err := m.SummaryContextMemory()
 		if err != nil {
-			logrus.Errorf("SummaryMemoryContext error: %v", err)
+			logrus.Errorf("SummaryContextMemory error: %v", err)
 		}
 	}()
 }
 
 // 这个函数需要加锁串行 如果用户问的特别快 导致gap没有清0 导致问多次大模型,总结多次, 最新的summary 可能被老的覆盖掉
 // 立即总结记忆上下文
-func (m *ContextMemoryHandler) SummaryMemoryContext() error {
+func (m *ContextMemoryHandler) SummaryContextMemory() error {
 	// 加锁
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -86,8 +86,12 @@ func (m *ContextMemoryHandler) SummaryMemoryContext() error {
 	}
 
 	// 如果大于了gap值则一次性进行总结 总结过程中 如果用户继续提问 会被阻塞 可以支持并发 如果程序挂断 重启后正常进行总结
-	originalMemories, _, err := m.sqlHandler.GetLastOriginalMemory(int(count))
-	if len(originalMemories) <= 0 {
+	originalMemories, findCount, err := m.sqlHandler.GetLastOriginalMemory(int(count))
+	if err != nil {
+		return err
+	}
+
+	if findCount <= 0 {
 		// 如果没有未总结的记忆则不进行总结
 		return nil
 	}
@@ -100,7 +104,6 @@ func (m *ContextMemoryHandler) SummaryMemoryContext() error {
 		content += fmt.Sprintf("%v:%v\n", v.Role, v.Content)
 	}
 
-	fmt.Println("content:", content)
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    "system",

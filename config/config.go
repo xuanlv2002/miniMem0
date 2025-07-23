@@ -32,8 +32,8 @@ type EmbeddingConfig struct {
 type VectorConfig struct {
 	Path                string  `mapstructure:"PATH"`
 	Collection          string  `mapstructure:"COLLECTION_NAME"`
-	MaxTopK             int     `mapstructure:"MAX_TOPK"`
-	SimilarityThreshold float32 `mapstructure:"MIN_SIMILARITY_THRESHOLD"`
+	TopK                int     `mapstructure:"TOPK"`
+	SimilarityThreshold float32 `mapstructure:"SIMILARITY_THRESHOLD"`
 }
 
 type SqlConfig struct {
@@ -169,7 +169,7 @@ func (c *Config) String() string {
 		sb.WriteString("  Vector Database Configuration:\n")
 		sb.WriteString(fmt.Sprintf("    Path: %s\n", c.VectorConfig.Path))
 		sb.WriteString(fmt.Sprintf("    Collection: %s\n", c.VectorConfig.Collection))
-		sb.WriteString(fmt.Sprintf("    MaxTopK: %d\n", c.VectorConfig.MaxTopK))
+		sb.WriteString(fmt.Sprintf("    MaxTopK: %d\n", c.VectorConfig.TopK))
 		sb.WriteString(fmt.Sprintf("    SimilarityThreshold: %.2f\n", c.VectorConfig.SimilarityThreshold))
 	} else {
 		sb.WriteString("  Vector Database Configuration: nil\n")
