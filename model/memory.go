@@ -20,11 +20,11 @@ type OriginalMemory struct {
 
 // 记忆上下文结构体
 type ContextMemory struct {
-	ID        int64
-	Summary   string    // 用于管理记忆上下文，及智能体所处的环境,总结,对内容理解提供一个大致的方向性
-	Gap       int64     // 已gap时长
-	UpdatedAt time.Time // 最近修改时间
-	CreatedAt time.Time // 内置默认时间
+	ID            int64
+	Summary       string    // 用于管理记忆上下文，及智能体所处的环境,总结,对内容理解提供一个大致的方向性
+	LastSummaryID int64     // 最后一次总结的id
+	UpdatedAt     time.Time // 最近修改时间
+	CreatedAt     time.Time // 内置默认时间
 }
 
 type ShortMemory struct {

@@ -46,6 +46,7 @@ func (m *ContextMemoryHandler) GetMemoryContext() (*model.ContextMemory, error) 
 
 // 异步总结记忆上下文 避免阻塞记忆主线程
 func (m *ContextMemoryHandler) UpdateContextMemory() {
+	// 等待
 	m.wg.Add(1)
 	go func() {
 		defer m.wg.Done()
@@ -62,28 +63,44 @@ func (m *ContextMemoryHandler) SummaryMemoryContext() error {
 	// 加锁
 	m.mu.Lock()
 	defer m.mu.Unlock()
+
 	// 获取上下文记忆
 	contextMemory, err := m.sqlHandler.GetLastContextMemory()
 	if err != nil {
 		return err
 	}
-	// 如果小于gap值则不进行总结 并把gap++, 这里如果每锁 会导致gap值不正确
-	if contextMemory.Gap < int64(m.config.SummaryGap) {
-		contextMemory.Gap++
+
+	// 获取未总结的记忆数量
+	count, err := m.sqlHandler.GetUnSummarizedMemoryCount(contextMemory.LastSummaryID)
+	if err != nil {
+		return err
+	}
+
+	// 如果未总结数量小于等于gap值则不进行总结 当大于gap的第一个则总结 加入gap设置为5  当新增5次信息 则对5次信息统一进行总结
+	if count < int64(m.config.SummaryGap) {
 		err = m.sqlHandler.SaveContextMemory(contextMemory)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	// 如果大于了gap值则进行总结
-	originalMemories, _, err := m.sqlHandler.GetLastOriginalMemory(m.config.SummaryGap)
+
+	// 如果大于了gap值则一次性进行总结 总结过程中 如果用户继续提问 会被阻塞 可以支持并发 如果程序挂断 重启后正常进行总结
+	originalMemories, _, err := m.sqlHandler.GetLastOriginalMemory(int(count))
+	if len(originalMemories) <= 0 {
+		// 如果没有未总结的记忆则不进行总结
+		return nil
+	}
+
 	content := "#已总结内容: \n" + contextMemory.Summary
 	content += "\n#待总结对话: \n"
+
+	lastSummaryId := originalMemories[len(originalMemories)-1].ID
 	for _, v := range originalMemories {
 		content += fmt.Sprintf("%v:%v\n", v.Role, v.Content)
 	}
 
+	fmt.Println("content:", content)
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    "system",
@@ -95,8 +112,6 @@ func (m *ContextMemoryHandler) SummaryMemoryContext() error {
 		},
 	}
 
-	fmt.Println("log:", content)
-
 	// 使用大模型总结记忆
 	summary, err := m.llmHandler.Chat(context.Background(), messages)
 	if err != nil {
@@ -104,7 +119,7 @@ func (m *ContextMemoryHandler) SummaryMemoryContext() error {
 	}
 	// 总结成功 这里把gap清空 后面的发现gap空之后 就++ 不进行总结了
 	contextMemory.Summary = summary.Content
-	contextMemory.Gap = 0
+	contextMemory.LastSummaryID = lastSummaryId
 	// 更新数据库
 	err = m.sqlHandler.SaveContextMemory(contextMemory)
 	return nil
