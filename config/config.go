@@ -48,8 +48,7 @@ type ContextMemoryConfig struct {
 
 // LongMemoryConfig 定义长记忆的配置
 type LongMemoryConfig struct {
-	LongWindow int `mapstructure:"LONG_WINDOW"`
-	LongGap    int `mapstructure:"LONG_GAP"`
+	LongGap int `mapstructure:"LONG_GAP"`
 }
 
 // ShortMemoryConfig 定义短记忆的配置

@@ -9,6 +9,7 @@ import (
 	"miniMem0/model"
 	"miniMem0/prompt"
 	"sync"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
@@ -78,10 +79,6 @@ func (m *ContextMemoryHandler) SummaryContextMemory() error {
 
 	// 如果未总结数量小于等于gap值则不进行总结 当大于gap的第一个则总结 加入gap设置为5  当新增5次信息 则对5次信息统一进行总结
 	if count < int64(m.config.SummaryGap) {
-		err = m.sqlHandler.SaveContextMemory(contextMemory)
-		if err != nil {
-			return err
-		}
 		return nil
 	}
 
@@ -123,7 +120,11 @@ func (m *ContextMemoryHandler) SummaryContextMemory() error {
 	// 总结成功 这里把gap清空 后面的发现gap空之后 就++ 不进行总结了
 	contextMemory.Summary = summary.Content
 	contextMemory.LastSummaryID = lastSummaryId
+	contextMemory.UpdatedAt = time.Now()
 	// 更新数据库
 	err = m.sqlHandler.SaveContextMemory(contextMemory)
+	if err != nil {
+		return err
+	}
 	return nil
 }

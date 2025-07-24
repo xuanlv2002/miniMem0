@@ -33,16 +33,25 @@ type ShortMemory struct {
 }
 
 type LongMemoryItem struct {
-	ID       string
-	Text     string
-	Meta     map[string]string
-	Similary float32 // 基于文本内容符合度搜索   基于元数据搜索
+	ID       string            `json:"id"`
+	Text     string            `json:"text"`
+	Meta     map[string]string `json:"meta"`
+	Similary float32           `json:"similary,omitempty"` // 基于文本内容符合度搜索   基于元数据搜索
 }
 
 // 长期记忆结构体
 type LongMemory struct {
+	ID               int64
 	LastExtractionID int64            // 最近一次抽取长期记忆ID
-	VectorMemorys    []LongMemoryItem // 基于语义相似搜索
+	VectorMemorys    []LongMemoryItem `gorm:"-"` // 基于语义相似搜索
 	// 基于模型来把自然语言转为结构化查询 来获得更全面的关系数据 暂未实现
 	// 通过混合长期记忆搜索的方式 获得更全面的消息信息(function call?)
+	UpdatedAt time.Time // 最近修改时间
+}
+
+type MemoryEvent struct {
+	ID    string            `json:"id"`
+	Text  string            `json:"text"`
+	Meta  map[string]string `json:"meta"`
+	Event string            `json:"event"`
 }

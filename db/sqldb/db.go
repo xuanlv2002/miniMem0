@@ -19,7 +19,7 @@ func NewSQL(cfg *config.SqlConfig) (*SqlHandler, error) {
 		return nil, err
 	}
 	// Migrate the schema
-	db.AutoMigrate(&model.OriginalMemory{}, &model.ContextMemory{})
+	db.AutoMigrate(&model.OriginalMemory{}, &model.ContextMemory{}, &model.LongMemory{})
 	return &SqlHandler{DB: db}, nil
 }
 
@@ -77,6 +77,30 @@ func (db *SqlHandler) SaveContextMemory(memory *model.ContextMemory) error {
 func (db *SqlHandler) GetUnSummarizedMemoryCount(lastSummaryID int64) (int64, error) {
 	var count int64
 	err := db.DB.Model(&model.OriginalMemory{}).Where("id > ?", lastSummaryID).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+/* 长期记忆处理函数 */
+func (db *SqlHandler) GetLastLongMemroy() (*model.LongMemory, error) {
+	var ret model.LongMemory
+	err := db.DB.Last(&ret).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+func (db *SqlHandler) SaveLongMemoryLastExtractionID(memory *model.LongMemory) error {
+	return db.DB.Save(memory).Error
+}
+
+// 获得未总结的记忆的个数
+func (db *SqlHandler) GetUnExtractionMemoryCount(LastExtractionID int64) (int64, error) {
+	var count int64
+	err := db.DB.Model(&model.OriginalMemory{}).Where("id > ?", LastExtractionID).Count(&count).Error
 	if err != nil {
 		return 0, err
 	}
