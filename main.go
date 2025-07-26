@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"miniMem0/example"
+
+	"github.com/xuanlv2002/miniMem0/example"
 )
 
 func main() {

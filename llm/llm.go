@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"io"
-	"miniMem0/config"
 	"strings"
 	"sync"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/xuanlv2002/miniMem0/config"
 )
 
 /*

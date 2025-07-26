@@ -1,14 +1,14 @@
 package memory
 
 import (
-	"miniMem0/config"
-	"miniMem0/db/sqldb"
-	"miniMem0/db/vector"
-	"miniMem0/llm"
-	"miniMem0/model"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/db/sqldb"
+	"github.com/xuanlv2002/miniMem0/db/vector"
+	"github.com/xuanlv2002/miniMem0/llm"
+	"github.com/xuanlv2002/miniMem0/model"
 )
 
 // 原始记忆结构体 包含角色 内容 时间

@@ -1,9 +1,9 @@
 package memory
 
 import (
-	"miniMem0/config"
-	"miniMem0/db/sqldb"
-	"miniMem0/model"
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/db/sqldb"
+	"github.com/xuanlv2002/miniMem0/model"
 )
 
 /*

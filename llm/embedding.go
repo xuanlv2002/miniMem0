@@ -3,11 +3,12 @@ package llm
 import (
 	"context"
 	"errors"
-	"miniMem0/config"
+
 	"sync"
 
 	"github.com/philippgille/chromem-go"
 	"github.com/sashabaranov/go-openai"
+	"github.com/xuanlv2002/miniMem0/config"
 )
 
 /*

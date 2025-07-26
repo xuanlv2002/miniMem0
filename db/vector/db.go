@@ -2,8 +2,9 @@ package vector
 
 import (
 	"context"
-	"miniMem0/config"
 	"time"
+
+	"github.com/xuanlv2002/miniMem0/config"
 
 	"github.com/philippgille/chromem-go"
 )

@@ -3,16 +3,17 @@ package memory
 import (
 	"context"
 	"fmt"
-	"miniMem0/config"
-	"miniMem0/db/sqldb"
-	"miniMem0/llm"
-	"miniMem0/model"
-	"miniMem0/prompt"
+
 	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/db/sqldb"
+	"github.com/xuanlv2002/miniMem0/llm"
+	"github.com/xuanlv2002/miniMem0/model"
+	"github.com/xuanlv2002/miniMem0/prompt"
 )
 
 // 用于管理记忆上下文，及智能体所处的环境,总结,对内容理解提供一个大致的方向性

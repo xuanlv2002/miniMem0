@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"miniMem0/config"
-	"miniMem0/llm"
-	"miniMem0/memory"
 	"os"
+
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/llm"
+	"github.com/xuanlv2002/miniMem0/memory"
 
 	"github.com/sashabaranov/go-openai"
 )

@@ -1,4 +1,4 @@
-module miniMem0
+module github.com/xuanlv2002/miniMem0
 
 go 1.22.5
 

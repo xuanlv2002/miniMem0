@@ -1,9 +1,10 @@
 package sqldb
 
 import (
-	"miniMem0/config"
-	"miniMem0/model"
 	"sort"
+
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/model"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

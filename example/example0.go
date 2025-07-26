@@ -2,8 +2,10 @@ package example
 
 import (
 	"fmt"
-	"miniMem0/config"
-	"miniMem0/memory"
+
+	"github.com/xuanlv2002/miniMem0/config"
+
+	"github.com/xuanlv2002/miniMem0/memory"
 )
 
 func Example0() {

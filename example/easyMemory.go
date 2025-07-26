@@ -11,10 +11,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"miniMem0/config"
-	"miniMem0/db/vector"
-	"miniMem0/llm"
 	"time"
+
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/db/vector"
+	"github.com/xuanlv2002/miniMem0/llm"
 
 	"github.com/google/uuid"
 	"github.com/philippgille/chromem-go"

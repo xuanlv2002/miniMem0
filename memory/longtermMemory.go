@@ -4,12 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"miniMem0/config"
-	"miniMem0/db/sqldb"
-	"miniMem0/db/vector"
-	"miniMem0/llm"
-	"miniMem0/model"
-	"miniMem0/prompt"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +12,12 @@ import (
 	"github.com/philippgille/chromem-go"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
+	"github.com/xuanlv2002/miniMem0/config"
+	"github.com/xuanlv2002/miniMem0/db/sqldb"
+	"github.com/xuanlv2002/miniMem0/db/vector"
+	"github.com/xuanlv2002/miniMem0/llm"
+	"github.com/xuanlv2002/miniMem0/model"
+	"github.com/xuanlv2002/miniMem0/prompt"
 )
 
 /*
