@@ -123,10 +123,11 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		
 		// 退出条件
-		if input == "q\n" {
+		if strings.TrimSpace(input) == "q" {
 			fmt.Println("感谢使用，再见！")
 			return
 		}
+
 
 		// 通过记忆系统处理输入
 		enhancedPrompt, err := memSys.ProcessInput(input)
