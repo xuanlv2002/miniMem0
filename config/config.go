@@ -182,19 +182,24 @@ func (c *Config) String() string {
 	}
 
 	if c.MemoryContextConfig != nil {
-		sb.WriteString("  Memory Context Configuration: present\n")
+		sb.WriteString("  Memory Context Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    SummaryGap: %d\n", c.MemoryContextConfig.SummaryGap))
+
 	} else {
 		sb.WriteString("  Memory Context Configuration: nil\n")
 	}
 
 	if c.LongMemoryConfig != nil {
-		sb.WriteString("  Long Memory Configuration: present\n")
+		sb.WriteString("  Long Memory Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    LongGap: %d\n", c.LongMemoryConfig.LongGap))
 	} else {
 		sb.WriteString("  Long Memory Configuration: nil\n")
 	}
 
 	if c.ShortMemoryConfig != nil {
-		sb.WriteString("  Short Memory Configuration: present\n")
+		sb.WriteString("  Short Memory Configuration:\n")
+		sb.WriteString(fmt.Sprintf("    ShortWindow: %d\n", c.ShortMemoryConfig.ShortWindow))
+
 	} else {
 		sb.WriteString("  Short Memory Configuration: nil\n")
 	}

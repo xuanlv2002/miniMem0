@@ -6,6 +6,7 @@ import (
 	"miniMem0/db/vector"
 	"miniMem0/llm"
 	"miniMem0/model"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -52,6 +53,13 @@ func NewMemorySystem(options *config.Config) (*MemorySystem, error) {
 }
 
 func (m *MemorySystem) FlushMemory() error {
+	// 手动触发记忆更新
+	m.ContextMemoryHandler.UpdateContextMemory()
+	m.LongMemoryHandler.UpdateLongMemory()
+
+	// 等待所有记忆处理完成
+	m.ContextMemoryHandler.WaitDone()
+	m.LongMemoryHandler.WaitDone()
 	return nil
 }
 
@@ -89,12 +97,30 @@ func (m *MemorySystem) ProcessInput(input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return prompt, nil
 }
 
 // 处理大模型输出内容
 func (m *MemorySystem) ProcessOutput(ouput string) error {
-	// 存储OriginalMemory
+	// 将模型输出存储短期记忆
+	outputMemory := &model.OriginalMemory{
+		Role:      openai.ChatMessageRoleAssistant,
+		Content:   ouput,
+		CreatedAt: time.Now(),
+	}
+	err := m.sqlHandler.AddOriginalMemory(outputMemory)
+	if err != nil {
+		return err
+	}
+
+	// 更新上下文记忆
+	m.ContextMemoryHandler.UpdateContextMemory()
+
+	// 更新长期记忆
+	m.LongMemoryHandler.UpdateLongMemory()
+
+	// 等待所有记忆处理完成
+	m.ContextMemoryHandler.WaitDone()
+	m.LongMemoryHandler.WaitDone()
 	return nil
 }

@@ -14,7 +14,6 @@ import (
 	"miniMem0/config"
 	"miniMem0/db/vector"
 	"miniMem0/llm"
-	"miniMem0/prompt"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,7 +57,7 @@ func (ms *MemorySystem) ExtractFacts(ctx context.Context, conversation string) (
 	result, err := ms.LLM.Chat(ctx, []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: prompt.FACT_EXTRACTION_PROMPT,
+			Content: FACT_EXTRACTION_PROMPT,
 		}, {
 			Role:    openai.ChatMessageRoleUser,
 			Content: conversation,
@@ -101,7 +100,7 @@ func (ms *MemorySystem) ProcessMemory(ctx context.Context, newFacts []string, ex
 	result, err := ms.LLM.Chat(ctx, []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: prompt.MEMORY_PROCESSING_PROMPT,
+			Content: MEMORY_PROCESSING_PROMPT,
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,

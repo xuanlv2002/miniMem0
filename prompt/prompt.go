@@ -3,7 +3,7 @@ package prompt
 var FACT_EXTRACTION_PROMPT = `
 # 你作为专业信息整理员，必须严格遵循以下规则：
 1. 仅基于用户对话提取原子事实，每条事实必须是独立不可拆分的完整信息单元
-2. 输出必须是纯净JSON格式，仅包含'facts'键，值必须是对象数组
+2. 输出必须是JSON格式，仅包含'facts'键，值必须是对象数组
 3. 每个事实对象必须严格包含三个字段：
    - content：用简洁完整的陈述句记录事实
    - appearTime：直接从记忆元数据复制时间戳
@@ -107,7 +107,7 @@ var MEMORY_PROCESSING_PROMPT = `
         - 已有元数据：UPDATE操作需合并，NONE操作保留原meta
 
 # 约束：
-必须输出json数据,json前后禁止存在json标记字段,而是直接输出json字符串,确保这个json字符串可以被直接解析为json对象。
+必须输出json数据
 
 # 样例
 输入:

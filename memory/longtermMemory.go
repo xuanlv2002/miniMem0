@@ -10,6 +10,7 @@ import (
 	"miniMem0/llm"
 	"miniMem0/model"
 	"miniMem0/prompt"
+	"strings"
 	"sync"
 	"time"
 
@@ -243,7 +244,8 @@ func (l *LongMemoryHandler) ExtractFacts(ctx context.Context, conversation strin
 		Facts []model.Fact `json:"facts"`
 	}
 	fmt.Println("大模型输出:", result.Content)
-	if err := json.Unmarshal([]byte(result.Content), &response); err != nil {
+	jsContent := parseJson(result.Content)
+	if err := json.Unmarshal([]byte(jsContent), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
 
@@ -279,7 +281,8 @@ func (l *LongMemoryHandler) processMemory(ctx context.Context, newFacts []model.
 	}
 
 	fmt.Println("大模型记忆更新输出:", result.Content)
-	if err := json.Unmarshal([]byte(result.Content), &response); err != nil {
+	jsContent := parseJson(result.Content)
+	if err := json.Unmarshal([]byte(jsContent), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
 
@@ -332,4 +335,15 @@ func (l *LongMemoryHandler) deleteMemory(ctx context.Context, memoryID string) e
 	}
 
 	return nil
+}
+
+func parseJson(s string) string {
+	if strings.HasPrefix(s, "json```") && strings.HasSuffix(s, "```") {
+		// 提取 JSON 部分
+		s = strings.TrimPrefix(s, "json```")
+		s = strings.TrimSuffix(s, "```")
+	}
+
+	// 直接返回原始字符串（可能是纯 JSON）
+	return strings.TrimSpace(s)
 }

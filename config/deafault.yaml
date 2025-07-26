@@ -1,20 +1,20 @@
 LLM:
-  MODEL: "Qwen/Qwen2.5-7B-Instruct"
+  MODEL: "Qwen/Qwen2.5-Coder-32B-Instruct"
   BASE_URL:  "https://api.siliconflow.cn/v1"
   API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxx"
   TEMPERATURE: 0
 
 EMBEDDING:
-  MODEL: "Qwen/Qwen3-Embedding-0.6B"
+  MODEL: "Qwen/Qwen3-Embedding-4B"
   BASE_URL:  "https://api.siliconflow.cn/v1"
   API_KEY: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  DIMENSIONS: 1024
+  DIMENSIONS: 2048
 
 VECTOR_DB:
   PATH: "./memory_db/long_term_memory"
   COLLECTION_NAME: "long_term_memory"
   TOPK: 10  # 最大返回数量
-  SIMILARITY_THRESHOLD: 0.1 # 相似度最小阈值
+  SIMILARITY_THRESHOLD: 0.4 # 相似度最小阈值
 
 SQL_DB:
   PATH: "./memory_db/context_memory.db"
@@ -22,10 +22,10 @@ SQL_DB:
 
 
 CONTEXT_MEMORY:
-  SUMMARY_GAP: 5 # 每隔五次对话 更新一次摘要。 这个值最好 <= SHORT_WINDOW 确保summary 和 短期记忆有重叠 避免信息丢失
+  SUMMARY_GAP: 6 # 每隔n条记录 更新一次摘要。 这个值最好 <= SHORT_WINDOW 确保summary 和 短期记忆有重叠 避免信息丢失
 
 SHORT_MEMORY:
-  SHORT_WINDOW: 10 # 短期记忆长度 最近的十条记录作为短期记忆
+  SHORT_WINDOW: 6 # 短期记忆长度 最近的n条记录作为短期记忆
  
 LONG_MEMORY:
-  LONG_GAP: 8 # 长期记忆间隔  每8条记录更新一次长期记忆(通过摘要和8条短期记忆进行总结) LONG_GAP < SHORT_WINDOW 确保长短期记忆间有一定重叠 避免信息丢失
+  LONG_GAP: 4 # 长期记忆间隔  每n条记录更新一次长期记忆(通过摘要和n条短期记忆进行总结) LONG_GAP < SHORT_WINDOW 确保长短期记忆间有一定重叠 避免信息丢失
