@@ -5,6 +5,7 @@ import (
 	"miniMem0/db/sqldb"
 	"miniMem0/db/vector"
 	"miniMem0/llm"
+	"miniMem0/model"
 )
 
 // 原始记忆结构体 包含角色 内容 时间
@@ -13,6 +14,8 @@ type MemorySystem struct {
 	LongMemoryHandler    *LongMemoryHandler
 	ShortMemoryHandler   *ShortMemroyHandler
 	ContextMemoryHandler *ContextMemoryHandler
+	sqlHandler           *sqldb.SqlHandler
+	vectorHandler        *vector.Vector
 }
 
 func NewMemorySystem(options *config.Config) (*MemorySystem, error) {
@@ -41,22 +44,51 @@ func NewMemorySystem(options *config.Config) (*MemorySystem, error) {
 		ContextMemoryHandler: contextMemoryHandler,
 		LongMemoryHandler:    longMemoryHandler,
 		ShortMemoryHandler:   shortMemoryHandler,
+		sqlHandler:           sqlHandler,
+		vectorHandler:        vectorDB,
 	}, nil
 }
 
-func (m *MemorySystem) InitMemory() error {
+func (m *MemorySystem) FlushMemory() error {
 	return nil
 }
 
 // 处理大模型输入内容
-func (m *MemorySystem) ProcessInput(input string) string {
-	// 存储OriginalMemory
+func (m *MemorySystem) ProcessInput(input string) (string, error) {
+	// 传入激活内容
+	activeMemory := &model.OriginalMemory{
+		Role:    model.UserRole,
+		Content: input,
+	}
+
+	// 获得完整短期记忆
+	shortMemory, err := m.ShortMemoryHandler.GetShortMemory()
+	if err != nil {
+		return "", err
+	}
+
 	// 获得上下文记忆
+	contextMemory, err := m.ContextMemoryHandler.GetContextMemory()
+	if err != nil {
+		return "", err
+	}
+
 	// 获得长期记忆
-	// 获得短期记忆
-	// 拼接记忆内容
+	longMemory, err := m.LongMemoryHandler.GetLongMemory(activeMemory.Content)
+	if err != nil {
+		return "", err
+	}
+
 	// 返回拼接后的prompt
-	return ""
+	prompt := contextMemory.GetPrompt() + longMemory.GetPrompt() + shortMemory.GetPrompt() + "#用户输入: \n" + activeMemory.GetPrompt()
+
+	// 将瞬时记忆存储 OriginalMemory
+	err = m.sqlHandler.AddOriginalMemory(activeMemory)
+	if err != nil {
+		return "", err
+	}
+
+	return prompt, nil
 }
 
 // 处理大模型输出内容
