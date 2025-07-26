@@ -123,8 +123,8 @@ func main() {
 		input, _ := reader.ReadString('\n')
 		
 		// 退出条件
-		if input == "q\n" {
-			fmt.Println("感谢使用，再见！")
+		if strings.TrimSpace(input) == "q" {
+			fmt.Println("退出程序")
 			return
 		}
 
