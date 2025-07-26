@@ -34,6 +34,7 @@ type LongMemoryHandler struct {
 	wg         sync.WaitGroup // 用来等待所有任务完成
 }
 
+// 新建长期记忆系统
 func NewLongMemory(config *config.LongMemoryConfig, vector *vector.Vector, sqlHandler *sqldb.SqlHandler, llmModel *llm.LLM) *LongMemoryHandler {
 	return &LongMemoryHandler{
 		vector:     vector,
@@ -43,14 +44,15 @@ func NewLongMemory(config *config.LongMemoryConfig, vector *vector.Vector, sqlHa
 	}
 }
 
+// 等待所有任务完成
 func (l *LongMemoryHandler) WaitDone() {
-	l.wg.Done()
+	l.wg.Wait()
 }
 
-// 获得长期记忆
+// 获得相关长期记忆
 func (l *LongMemoryHandler) GetLongMemory(text string) (*model.LongMemory, error) {
 	var LongMemory model.LongMemory
-
+	// 搜索
 	ret, err := l.vector.Search(context.Background(), text)
 	if err != nil {
 		return nil, err
@@ -77,7 +79,7 @@ func (l *LongMemoryHandler) UpdateLongMemory() {
 		defer l.wg.Done()
 		err := l.SaveLongMemory()
 		if err != nil {
-			logrus.Errorf("SummaryMemoryContext error: %v", err)
+			logrus.Errorf("LongMemory error: %v", err)
 		}
 	}()
 }
@@ -87,78 +89,87 @@ func (l *LongMemoryHandler) SaveLongMemory() error {
 	// 加锁
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	// 获得长期记忆位置
+	// 获得长期记忆位置 获得长期记忆已经存储到的位置
 	longMemory, err := l.sqlHandler.GetLastLongMemroy()
 	if err != nil {
+		logrus.Errorf("failed to get last long memory: %v", err)
 		return err
 	}
 	// 判断是否需要更新记忆
 	count, err := l.sqlHandler.GetUnExtractionMemoryCount(longMemory.LastExtractionID)
 	if err != nil {
+		logrus.Errorf("failed to get unextraction memory count: %v", err)
 		return err
 	}
 
 	// 如果小于则不更新记忆
 	if count < int64(l.config.LongGap) {
+		logrus.Infof("No new memories to extract, current count: %d, required gap: %d", count, l.config.LongGap)
 		return nil
 	}
 
 	// 获得上下文记忆
 	contextMemory, err := l.sqlHandler.GetLastContextMemory()
 	if err != nil {
+		logrus.Errorf("failed to get last context memory: %v", err)
 		return err
 	}
 
 	// 获得未抽取的记忆
 	originalMemories, findCount, err := l.sqlHandler.GetLastOriginalMemory(int(count))
 	if err != nil {
+		logrus.Errorf("failed to get last original memory: %v", err)
 		return err
 	}
 
 	if findCount <= 0 {
 		// 如果没有未总结的记忆则不进行总结
+		logrus.Info("No new memories to extract, find count is 0")
 		return nil
 	}
 
 	// 组装信息
 	var content string
-	content += "#记忆上下文：\n"
-	content += contextMemory.Summary
-	content += "\n !！注解 !! 记忆上下文是基于大模型对整体对话的一个总结，可能与当前对话不完全相关，但可以作为参考。\n"
+	content += contextMemory.GetPrompt()
+	content += "\n !！注解 !! 记忆上下文是基于大模型对整体对话的一个总结，可能与当前对话不完全相关，但可以作为参考。\n\n"
 
+	content += "#待提取信息记忆: \n"
 	for _, v := range originalMemories {
-		content += "\n#角色："
-		content += string(v.Role)
-		content += "\n#原始记忆："
-		content += v.Content
-		content += "\n#记忆元数据"
-		content += "记忆时间:" + v.CreatedAt.String() + "\n\n"
+		content += string(v.Role) + ":" + v.Content
+		content += "\n记忆元数据"
+		content += "记忆时间:" + v.CreatedAt.Format("2006-01-02 15:04:05") + "\n\n"
 	}
 
 	// 抽取长期记忆
 	facts, err := l.ExtractFacts(context.Background(), content)
 	if err != nil {
+		logrus.Errorf("failed to extract facts: %v", err)
 		return err
 	}
 	if len(facts) == 0 {
 		logrus.Info("no new facts found")
+		longMemory.LastExtractionID = originalMemories[len(originalMemories)-1].ID
+		longMemory.UpdatedAt = time.Now()
+		err = l.sqlHandler.SaveLongMemoryLastExtractionID(longMemory)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
 	// 抽取相关长期记忆
 	var retrievedOldMemoriesMap = make(map[string]model.LongMemoryItem)
 	for _, fact := range facts {
-		memories, err := l.vector.Search(context.Background(), fact)
+		memories, err := l.vector.Search(context.Background(), fact.Content)
 		if err != nil {
 			return fmt.Errorf("failed to search memories: %v", err)
 		}
 		// 抽取到的相关记忆
 		for _, mem := range memories {
 			retrievedOldMemoriesMap[mem.ID] = model.LongMemoryItem{
-				ID:   mem.ID,      // 记忆ID
-				Text: mem.Content, // 记忆内容
-				// 事件不需要传入 仅调用的时候 需要有这个事实记忆的来源
-				// 修改阶段不需要
+				ID:   mem.ID,       // 记忆ID
+				Text: mem.Content,  // 记忆内容
+				Meta: mem.Metadata, // 记忆元数据
 			}
 		}
 	}
@@ -173,6 +184,7 @@ func (l *LongMemoryHandler) SaveLongMemory() error {
 	if err != nil {
 		return fmt.Errorf("failed to process memories: %v", err)
 	}
+	fmt.Println("safeMemories:", safeMemories)
 	// 更新长期记忆
 	for _, mem := range safeMemories {
 		event := mem.Event
@@ -212,7 +224,7 @@ func (l *LongMemoryHandler) SaveLongMemory() error {
 }
 
 // 事实提取 提取长期记忆内容
-func (l *LongMemoryHandler) ExtractFacts(ctx context.Context, conversation string) ([]string, error) {
+func (l *LongMemoryHandler) ExtractFacts(ctx context.Context, conversation string) ([]model.Fact, error) {
 	// 调用LLM进行事实提取
 	result, err := l.llmHandler.Chat(ctx, []openai.ChatCompletionMessage{
 		{
@@ -228,25 +240,24 @@ func (l *LongMemoryHandler) ExtractFacts(ctx context.Context, conversation strin
 	}
 
 	var response struct {
-		Facts []string `json:"facts"`
+		Facts []model.Fact `json:"facts"`
 	}
+	fmt.Println("大模型输出:", result.Content)
 	if err := json.Unmarshal([]byte(result.Content), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
 
 	return response.Facts, nil
 }
-func (l *LongMemoryHandler) processMemory(ctx context.Context, newFacts []string, oldMemory []model.LongMemoryItem) ([]model.MemoryEvent, error) {
-	input := map[string]interface{}{
-		"new_facts":         newFacts,
-		"existing_memories": oldMemory,
+func (l *LongMemoryHandler) processMemory(ctx context.Context, newFacts []model.Fact, oldMemory []model.LongMemoryItem) ([]model.MemoryEvent, error) {
+	content := "#新获取的事实: \n"
+	for _, fact := range newFacts {
+		content += fmt.Sprintf("   -内容: %s, 出现时间: %s, 关于: %s\n", fact.Content, fact.AppearTime, fact.About)
 	}
 
-	inputJSON, err := json.Marshal(input)
-	fmt.Println("inputJSON:", string(inputJSON))
-
-	if err != nil {
-		return nil, err
+	content += "\n#可能相关的记忆: \n"
+	for _, v := range oldMemory {
+		content += fmt.Sprintf("   -ID: %s, 内容: %s, 元数据: %v\n", v.ID, v.Text, v.Meta)
 	}
 
 	result, err := l.llmHandler.Chat(ctx, []openai.ChatCompletionMessage{
@@ -256,7 +267,7 @@ func (l *LongMemoryHandler) processMemory(ctx context.Context, newFacts []string
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: string(inputJSON),
+			Content: content,
 		},
 	})
 	if err != nil {
@@ -267,7 +278,7 @@ func (l *LongMemoryHandler) processMemory(ctx context.Context, newFacts []string
 		Memory []model.MemoryEvent `json:"memory"`
 	}
 
-	fmt.Println("提取的JSON数据:", result.Content)
+	fmt.Println("大模型记忆更新输出:", result.Content)
 	if err := json.Unmarshal([]byte(result.Content), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
@@ -315,7 +326,7 @@ func (l *LongMemoryHandler) updateMemory(ctx context.Context, memoryID, newText 
 
 // 删除记忆
 func (l *LongMemoryHandler) deleteMemory(ctx context.Context, memoryID string) error {
-	err := l.vector.Delete(context.Background(), []string{memoryID})
+	err := l.vector.Delete(ctx, []string{memoryID})
 	if err != nil {
 		return fmt.Errorf("failed to delete memory: %v", err)
 	}

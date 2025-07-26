@@ -6,6 +6,8 @@ import (
 	"miniMem0/db/vector"
 	"miniMem0/llm"
 	"miniMem0/model"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 // 原始记忆结构体 包含角色 内容 时间
@@ -57,7 +59,7 @@ func (m *MemorySystem) FlushMemory() error {
 func (m *MemorySystem) ProcessInput(input string) (string, error) {
 	// 传入激活内容
 	activeMemory := &model.OriginalMemory{
-		Role:    model.UserRole,
+		Role:    openai.ChatMessageRoleUser,
 		Content: input,
 	}
 

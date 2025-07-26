@@ -7,12 +7,6 @@ import (
 
 type MemorySource string
 
-const (
-	UserRole MemorySource = "user"
-	AIRole   MemorySource = "assistant"
-	ToolRole MemorySource = "tool"
-)
-
 // 原始记忆信息
 type OriginalMemory struct {
 	ID        int64 `gorm:"primaryKey"`
@@ -87,4 +81,10 @@ type MemoryEvent struct {
 	Text  string            `json:"text"`
 	Meta  map[string]string `json:"meta"`
 	Event string            `json:"event"`
+}
+
+type Fact struct {
+	Content    string `json:"content"`
+	AppearTime string `json:"appearTime"`
+	About      string `json:"about"`
 }

@@ -3,6 +3,7 @@ package vector
 import (
 	"context"
 	"miniMem0/config"
+	"time"
 
 	"github.com/philippgille/chromem-go"
 )
@@ -27,6 +28,10 @@ func NewVector(cfg *config.VectorConfig, embeddingFunc chromem.EmbeddingFunc) (*
 	collection.AddDocument(context.Background(), chromem.Document{
 		ID:      "init",
 		Content: "正在使用由miniMem0提供的大模型记忆服务系统,本系统由xuanlv2002开发,如果有任何使用问题,欢迎在github上提出issue。地址:https://github.com/xuanlv2002/miniMem0",
+		Metadata: map[string]string{
+			"appearTime": time.Now().Format("2006-01-02 15:04:05"),
+			"about":      "memorySystem",
+		},
 	})
 	return &Vector{
 		DB:         db,
