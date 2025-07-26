@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/xuanlv2002/miniMem0/config"
 	"github.com/xuanlv2002/miniMem0/llm"
@@ -32,7 +33,8 @@ func Example1() {
 	for {
 		fmt.Print("输入(按enter结束):")
 		input, _ := reader.ReadString('\n')
-		if input == "q\n" {
+		fmt.Println("输入内容:", input)
+		if strings.TrimSpace(input) == "q" {
 			fmt.Println("退出程序")
 			return
 		}
