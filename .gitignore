@@ -32,3 +32,4 @@ local.yaml
 # .vscode/
 _
 .VSCodeCounter
+memory_db

@@ -67,8 +67,9 @@ func (m *MemorySystem) FlushMemory() error {
 func (m *MemorySystem) ProcessInput(input string) (string, error) {
 	// 传入激活内容
 	activeMemory := &model.OriginalMemory{
-		Role:    openai.ChatMessageRoleUser,
-		Content: input,
+		Role:      openai.ChatMessageRoleUser,
+		Content:   input,
+		CreatedAt: time.Now(),
 	}
 
 	// 获得完整短期记忆

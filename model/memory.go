@@ -16,7 +16,7 @@ type OriginalMemory struct {
 }
 
 func (o *OriginalMemory) GetPrompt() string {
-	return fmt.Sprintf("%s: %s", o.Role, o.Content)
+	return fmt.Sprintf("%v - %v:%v", o.CreatedAt.Format("2006-01-02 15:04:05"), o.Role, o.Content)
 }
 
 // 记忆上下文结构体
@@ -42,8 +42,11 @@ type ShortMemory struct {
 
 func (s *ShortMemory) GetPrompt() string {
 	content := "#短期记忆: \n"
+	if len(s.Memorys) == 0 {
+		return content + "暂无短期记忆信息"
+	}
 	for _, memory := range s.Memorys {
-		content += fmt.Sprintf("%v:%v\n", memory.Role, memory.Content)
+		content += fmt.Sprintf("%v - %v:%v", memory.CreatedAt.Format("2006-01-02 15:04:05"), memory.Role, memory.Content)
 	}
 	return content
 }

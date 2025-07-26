@@ -243,8 +243,9 @@ func (l *LongMemoryHandler) ExtractFacts(ctx context.Context, conversation strin
 	var response struct {
 		Facts []model.Fact `json:"facts"`
 	}
-	fmt.Println("大模型输出:", result.Content)
+
 	jsContent := parseJson(result.Content)
+
 	if err := json.Unmarshal([]byte(jsContent), &response); err != nil {
 		return nil, fmt.Errorf("failed to parse LLM response: %v", err)
 	}
@@ -338,9 +339,9 @@ func (l *LongMemoryHandler) deleteMemory(ctx context.Context, memoryID string) e
 }
 
 func parseJson(s string) string {
-	if strings.HasPrefix(s, "json```") && strings.HasSuffix(s, "```") {
+	if strings.HasPrefix(s, "```json") && strings.HasSuffix(s, "```") {
 		// 提取 JSON 部分
-		s = strings.TrimPrefix(s, "json```")
+		s = strings.TrimPrefix(s, "```json")
 		s = strings.TrimSuffix(s, "```")
 	}
 
